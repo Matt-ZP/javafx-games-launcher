@@ -5,20 +5,27 @@ import javafx.scene.layout.VBox;
 
 public class GuessingGameView {
 
+    // Game logic object containing rules, target number and attempt tracking
     private GuessingGameLogic game;
+
+    // User input field for guesses
     private TextField guessField;
 
+    // Labels used to display game status and feedback
     private Label resultLabel;
     private Label attemptsLabel;
     private Label invalidInputLabel;
 
+    // Navigation and game control buttons
     private Button backButton;
     private Button submitButton;
     private Button playAgainButton;
 
+    // Maximum invalid submissions allowed before ending the game
     private static final int MAX_INVALID_INPUT = 5;
     private int invalidInput = 0;
 
+    // Build and return the Guessing Game user interface
     public VBox createView() {
         game = new GuessingGameLogic();
         Label titleLabel = new Label("Guessing Game");
@@ -26,14 +33,16 @@ public class GuessingGameView {
         Label guessLabel = new Label("Guess a number between 1 and 50 in 5 attempts");
         guessField = new TextField();
         guessField.setMaxWidth(150);
+        // Pressing Enter in the text field processes the guess
         guessField.setOnAction(event -> processGuess());
 
 
         resultLabel = new Label();
-        attemptsLabel = new Label("Attempts remaining: " + ( 5 - (game.getAttempts()) ) );
+        attemptsLabel = new Label("Attempts remaining: " + ((game.getMaxAttempts()) - (game.getAttempts())));
         invalidInputLabel = new Label("Invalid input: " + invalidInput);
 
         submitButton = new Button("Submit Guess");
+        // Clicking the Submit button processes the guess
         submitButton.setOnAction(event -> processGuess());
 
         playAgainButton = new Button("Play Again");
@@ -63,10 +72,12 @@ public class GuessingGameView {
         return backButton;
     }
 
+    // Process a user's guess, update the UI and determine whether the game should end
     private void processGuess() {
         String inputText = guessField.getText().trim();
-        String invalidInputReachedMessage = "GAME OVER - invalid input submissions reached. Play again?.";
+        String invalidInputReachedMessage = "GAME OVER - invalid input submissions reached. Play again?";
 
+        // Prevent blank submissions and track invalid input attempts
         if (inputText.isEmpty()) {
             invalidInput++;
             invalidInputLabel.setText("Invalid input: " + invalidInput);
@@ -81,18 +92,20 @@ public class GuessingGameView {
             return;
         }
 
+        // Convert user input to an integer and pass it to the game logic
         try {
             int guess = Integer.parseInt(inputText);
 
             String result = game.checkGuess(guess);
 
             resultLabel.setText(result);
-            attemptsLabel.setText("Attempts remaining: " + ( 5 - (game.getAttempts()) ) );
+            attemptsLabel.setText("Attempts remaining: " + ((game.getMaxAttempts()) - (game.getAttempts())));
 
             if (game.isGameOver()) {
                 endGame("GAME OVER - Maximum attempts reached. Play again?");
             }
 
+        // Handle non-numeric input without crashing the application
         } catch (NumberFormatException e) {
             invalidInput++;
             invalidInputLabel.setText("Invalid input: " + invalidInput);
@@ -109,18 +122,20 @@ public class GuessingGameView {
         guessField.requestFocus();
     }
 
-    private void endGame (String message) {
+    // Disable further guesses and display replay option
+    private void endGame(String message) {
         resultLabel.setText(message);
         submitButton.setDisable(true);
         playAgainButton.setVisible(true);
     }
 
-    private void resetGame() {
+    // Reset game state and UI components ready for a new game
+    public void resetGame() {
         game = new GuessingGameLogic();
         invalidInput = 0;
 
         resultLabel.setText("Result");
-        attemptsLabel.setText("Attempts remaining: " +  (5 - (game.getAttempts()) ) );
+        attemptsLabel.setText("Attempts remaining: " + ((game.getMaxAttempts()) - (game.getAttempts())));
         invalidInputLabel.setText("Invalid input: " + invalidInput);
 
         guessField.clear();
